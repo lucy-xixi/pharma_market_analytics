@@ -1,0 +1,43 @@
+{
+  "source": "digital_industry_indicators.csv",
+  "n_rows": 405,
+  "n_columns": 8,
+  "missing_by_column": {
+    "year": 0,
+    "industry": 0,
+    "region": 0,
+    "digital_index": 4,
+    "technology_investment": 0,
+    "revenue_growth": 0,
+    "employment": 4,
+    "rd_ratio": 2
+  },
+  "missing_pct_by_column": {
+    "year": 0.0,
+    "industry": 0.0,
+    "region": 0.0,
+    "digital_index": 0.99,
+    "technology_investment": 0.0,
+    "revenue_growth": 0.0,
+    "employment": 0.99,
+    "rd_ratio": 0.49
+  },
+  "duplicate_rows": 5,
+  "dtype_issues": [],
+  "range_violations": {
+    "year": 0,
+    "digital_index": 0,
+    "technology_investment": 0,
+    "revenue_growth": 0,
+    "employment": 0,
+    "rd_ratio": 0
+  },
+  "outlier_counts": {
+    "digital_index": 0,
+    "technology_investment": 3,
+    "revenue_growth": 0,
+    "employment": 0,
+    "rd_ratio": 0
+  },
+  "created_at": "2026-08-08T08:55:07.807001+00:00"
+}
