@@ -1,0 +1,61 @@
+{
+  "base": {
+    "source": "crude_oil_weekly_synthetic.csv",
+    "n_rows": 524,
+    "n_columns": 7,
+    "missing_by_column": {
+      "date": 0,
+      "commodity_id": 0,
+      "price_usd_bbl": 6,
+      "inventory_mmbbl": 4,
+      "frequency": 0,
+      "data_source": 0,
+      "data_type": 0
+    },
+    "missing_pct_by_column": {
+      "date": 0.0,
+      "commodity_id": 0.0,
+      "price_usd_bbl": 1.15,
+      "inventory_mmbbl": 0.76,
+      "frequency": 0.0,
+      "data_source": 0.0,
+      "data_type": 0.0
+    },
+    "duplicate_rows": 3,
+    "dtype_issues": [],
+    "range_violations": {},
+    "outlier_counts": {
+      "price_usd_bbl": 0,
+      "inventory_mmbbl": 0
+    },
+    "created_at": "2026-10-20T07:14:28.280892+00:00"
+  },
+  "commodity_extras": {
+    "invalid_dates": 0,
+    "negative_inventory_rows": 0,
+    "time_gaps_by_commodity": {
+      "BRENT_CRUDE": 1,
+      "WTI_CRUDE": 0
+    },
+    "time_gap_dates_by_commodity": {
+      "BRENT_CRUDE": [
+        "2021-06-18"
+      ],
+      "WTI_CRUDE": []
+    },
+    "duplicate_key": [
+      "date",
+      "commodity_id"
+    ],
+    "duplicate_rows_meaning": "Count of excess rows flagged by DataFrame.duplicated(subset=duplicate_key); not the size of duplicate groups.",
+    "extreme_price_flags": 0,
+    "notes": [
+      "duplicate_rows counts excess rows for key (date, commodity_id).",
+      "Extreme price outliers are flagged only; values are retained (markets can gap).",
+      "Negative inventory is treated as a data error and nullified during cleaning.",
+      "Negative prices are allowed (e.g. historical WTI stress scenarios in synthetic demos).",
+      "Time gaps list missing expected-frequency dates; rows are not auto-filled."
+    ]
+  },
+  "disclaimer": "Rows with data_type=synthetic / data_source=synthetic_demo are demonstration data only, not live public market feeds."
+}

@@ -23,6 +23,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from dashboard.data_service import (  # noqa: E402
+    get_commodity_association,
+    get_commodity_ids,
+    get_commodity_panel,
+    get_commodity_plot_frame,
+    get_commodity_qa,
+    get_commodity_view,
     get_kpis,
     get_panel,
     get_quality_monitoring,
@@ -314,6 +320,7 @@ with st.sidebar:
             "Data Quality Monitoring",
             "Indicator Analysis",
             "Forecasting",
+            "Commodity Market Analytics",
             "AI Insight Assistant",
         ],
         label_visibility="collapsed",
@@ -1084,6 +1091,174 @@ def page_forecasting() -> None:
 # Page 4 — AI Insight Assistant
 # ---------------------------------------------------------------------------
 
+def page_commodity() -> None:
+    st.title("Commodity Market Analytics")
+    st.caption(
+        "Crude oil price and inventory analytics from the SQLite analytical store "
+        "(Phase 1). Default demo rows are synthetic — not live market feeds."
+    )
+
+    panel = get_commodity_panel()
+    if panel.empty:
+        st.warning(
+            "No commodity_market_series data found. Run "
+            "`python scripts/run_pipeline.py` after generating the synthetic crude panel."
+        )
+        return
+
+    ids = get_commodity_ids()
+    if not ids:
+        st.warning("commodity_market_series has no commodity_id values.")
+        return
+
+    default_ix = ids.index("WTI_CRUDE") if "WTI_CRUDE" in ids else 0
+    commodity_id = st.selectbox("Commodity", ids, index=default_ix)
+    view = get_commodity_view(commodity_id)
+    qa = get_commodity_qa(commodity_id)
+
+    st.info(
+        f"**Provenance:** data_type=`{qa.get('data_type')}` · "
+        f"data_source=`{qa.get('data_source')}`. "
+        "Do not interpret synthetic_demo rows as live EIA/ICE/NYMEX prints."
+    )
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Observations", f"{qa['n_observations']:,}")
+    c2.metric("Date start", qa["date_min"] or "—")
+    c3.metric("Date end", qa["date_max"] or "—")
+    c4.metric("Duplicate excess rows", f"{qa['duplicate_excess_rows']}")
+    c5.metric("Missing weeks (W-FRI)", f"{qa['missing_week_count']}")
+
+    if qa["missing_week_dates"]:
+        with st.expander("Missing week-ending dates (not filled as observations)"):
+            st.write(", ".join(qa["missing_week_dates"]))
+            st.caption(
+                "Charts reindex to the weekly calendar and leave gaps as NaN so "
+                "missing weeks are visible — placeholders are not real prints."
+            )
+
+    plot_df = get_commodity_plot_frame(
+        commodity_id,
+        value_cols=(
+            "price_usd_bbl",
+            "inventory_mmbbl",
+            "price_change_pct",
+            "inventory_change_pct",
+        ),
+    )
+    if plot_df.empty:
+        st.warning("No plottable rows for the selected commodity.")
+        return
+
+    left, right = st.columns(2)
+    with left:
+        exec_note("Price path uses observed weeks only; calendar gaps break the line.")
+        fig = px.line(
+            plot_df,
+            x="date",
+            y="price_usd_bbl",
+            markers=True,
+            labels={"date": "Date", "price_usd_bbl": "Price (USD/bbl)"},
+        )
+        fig.update_traces(connectgaps=False)
+        apply_plotly_layout(
+            fig,
+            f"{commodity_id} — Price Trend",
+            x_title="Date",
+            y_title="Price (USD/bbl)",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with right:
+        exec_note("Inventory levels from the analytical store (mmbbl).")
+        fig = px.line(
+            plot_df,
+            x="date",
+            y="inventory_mmbbl",
+            markers=True,
+            labels={"date": "Date", "inventory_mmbbl": "Inventory (mmbbl)"},
+        )
+        fig.update_traces(connectgaps=False)
+        apply_plotly_layout(
+            fig,
+            f"{commodity_id} — Inventory Trend",
+            x_title="Date",
+            y_title="Inventory (mmbbl)",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    left2, right2 = st.columns(2)
+    with left2:
+        fig = px.line(
+            plot_df,
+            x="date",
+            y="price_change_pct",
+            markers=True,
+            labels={"date": "Date", "price_change_pct": "Price change (%)"},
+        )
+        fig.update_traces(connectgaps=False)
+        apply_plotly_layout(
+            fig,
+            f"{commodity_id} — Price Change Rate",
+            x_title="Date",
+            y_title="Price change (%)",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with right2:
+        fig = px.line(
+            plot_df,
+            x="date",
+            y="inventory_change_pct",
+            markers=True,
+            labels={"date": "Date", "inventory_change_pct": "Inventory change (%)"},
+        )
+        fig.update_traces(connectgaps=False)
+        apply_plotly_layout(
+            fig,
+            f"{commodity_id} — Inventory Change Rate",
+            x_title="Date",
+            y_title="Inventory change (%)",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Price change vs inventory change")
+    assoc = get_commodity_association(commodity_id)
+    exec_note(assoc["disclaimer"])
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Paired observations", f"{assoc['n_paired']}")
+    m2.metric(
+        "Pearson r",
+        "—" if assoc["correlation"] is None else f"{assoc['correlation']:.3f}",
+    )
+    m3.metric(
+        "p-value",
+        "—" if assoc["p_value"] is None else f"{assoc['p_value']:.4g}",
+    )
+
+    scatter = view.dropna(subset=["price_change_pct", "inventory_change_pct"])
+    if scatter.empty:
+        st.caption("Not enough paired non-null change rates for a scatter plot.")
+    else:
+        fig = px.scatter(
+            scatter,
+            x="inventory_change_pct",
+            y="price_change_pct",
+            labels={
+                "inventory_change_pct": "Inventory change (%)",
+                "price_change_pct": "Price change (%)",
+            },
+            trendline="ols",
+        )
+        apply_plotly_layout(
+            fig,
+            f"{commodity_id} — Co-movement (not causation)",
+            x_title="Inventory change (%)",
+            y_title="Price change (%)",
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+
 def page_ai() -> None:
     st.title("AI Insight Assistant")
     st.caption(
@@ -1185,6 +1360,7 @@ PAGES = {
     "Data Quality Monitoring": page_data_quality,
     "Indicator Analysis": page_indicators,
     "Forecasting": page_forecasting,
+    "Commodity Market Analytics": page_commodity,
     "AI Insight Assistant": page_ai,
 }
 

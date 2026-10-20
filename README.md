@@ -361,6 +361,23 @@ Plus supplementary series:
 
 Raw files intentionally include missing values and duplicates so the cleaning module can demonstrate quality controls.
 
+### Phase 1 commodity extension (crude — synthetic demo)
+
+Additive pipeline branch for crude oil **weekly** price/inventory panels:
+
+- Raw: `data/raw/crude_oil_weekly_synthetic.csv` (`data_type=synthetic`, `data_source=synthetic_demo`)
+- Processed: `data/processed/crude_oil_weekly_clean.csv` + SQLite table `commodity_market_series`
+- Features (`src/commodity_features.py`): `price_change_pct`, `inventory_change`, `inventory_change_pct`
+- Catalog: `data/metadata/datasets_catalog.csv`
+
+**Not included in Phase 1:** Streamlit commodity pages, crude forecasting UI, or live public market feeds. The synthetic file must not be described as real EIA/ICE/NYMEX data.
+
+```bash
+python scripts/generate_commodity_data.py
+python scripts/run_pipeline.py
+pytest tests/ -q
+```
+
 ---
 
 ## Data dictionary & metadata

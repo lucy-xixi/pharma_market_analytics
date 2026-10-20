@@ -32,3 +32,20 @@ industry_panel_clean,digital_development_index,Weighted composite Digital Develo
 industry_panel_clean,digital_index_yoy,Year-over-year change in digital index,float,Short-term digitalization momentum,percent,true,processed
 industry_panel_clean,technology_investment_yoy,Year-over-year change in technology investment,float,Short-term investment acceleration,percent,true,processed
 industry_panel_clean,revenue_growth_yoy,Year-over-year change in revenue growth rate,float,Acceleration or deceleration of growth performance,percent,true,processed
+crude_oil_weekly_synthetic,date,Observation date (week-ending Friday in demo generator),string,Time key for weekly crude market series,ISO8601_date,false,raw
+crude_oil_weekly_synthetic,commodity_id,Commodity contract / stream identifier (e.g. WTI_CRUDE),string,Entity key for multi-commodity panels,,false,raw
+crude_oil_weekly_synthetic,price_usd_bbl,Spot-style price level in US dollars per barrel,float,Primary price series for returns and scenario analysis,USD_per_barrel,true,raw
+crude_oil_weekly_synthetic,inventory_mmbbl,Inventory / stocks level,float,Supply-side stock indicator used for inventory change features,million_barrels,true,raw
+crude_oil_weekly_synthetic,frequency,Declared sampling frequency of the series,string,Documents cadence (weekly in Phase 1 demo),,false,raw
+crude_oil_weekly_synthetic,data_source,Provenance label for the row,string,Must be synthetic_demo for this file — not a live exchange feed,,false,raw
+crude_oil_weekly_synthetic,data_type,synthetic or real classification,string,Hard flag separating demo data from real public market data,,false,raw
+crude_oil_weekly_clean,date,Cleaned observation date,string,Governed time key after validation,ISO8601_date,false,processed
+crude_oil_weekly_clean,commodity_id,Validated commodity identifier,string,Grouping key for feature engineering,,false,processed
+crude_oil_weekly_clean,price_usd_bbl,Cleaned price (extremes retained),float,Price input for change-rate features; negatives allowed,USD_per_barrel,false,processed
+crude_oil_weekly_clean,inventory_mmbbl,Cleaned inventory (negative values nullified as errors),float,Inventory input for change features,million_barrels,false,processed
+crude_oil_weekly_clean,frequency,Sampling frequency label,string,Expected weekly cadence documentation,,false,processed
+crude_oil_weekly_clean,data_source,Provenance label retained through pipeline,string,Tracks synthetic vs future real feeds,,false,processed
+crude_oil_weekly_clean,data_type,synthetic or real classification retained,string,Prevents mislabeling demo data as live market data,,false,processed
+crude_oil_weekly_clean,price_change_pct,Period-over-period price return,float,Look-back return; first period per commodity is null,percent,true,processed
+crude_oil_weekly_clean,inventory_change,Period-over-period inventory difference,float,Absolute stock change vs prior week,million_barrels,true,processed
+crude_oil_weekly_clean,inventory_change_pct,Period-over-period inventory percentage change,float,Relative stock change; prior<=0 yields null,percent,true,processed

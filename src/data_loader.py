@@ -25,6 +25,20 @@ REQUIRED_COLUMNS = [
     "rd_ratio",
 ]
 
+# Crude / commodity weekly panel (Phase 1)
+COMMODITY_REQUIRED_COLUMNS = [
+    "date",
+    "commodity_id",
+    "price_usd_bbl",
+    "inventory_mmbbl",
+]
+
+COMMODITY_META_COLUMNS = [
+    "frequency",
+    "data_source",
+    "data_type",
+]
+
 
 class DataLoadError(Exception):
     """Raised when dataset loading or schema validation fails."""
@@ -84,6 +98,21 @@ def load_primary_panel(settings: Optional[dict] = None) -> pd.DataFrame:
     return load_csv(get_raw_dir(cfg) / filename, required_columns=REQUIRED_COLUMNS)
 
 
+def load_commodity_panel(settings: Optional[dict] = None) -> pd.DataFrame:
+    """
+    Load the crude/commodity weekly panel from raw CSV.
+
+    Default file is configured under settings['commodity']['primary_file'].
+    """
+    cfg = settings or load_settings()
+    commodity_cfg = cfg.get("commodity", {})
+    filename = commodity_cfg.get("primary_file", "crude_oil_weekly_synthetic.csv")
+    return load_csv(
+        get_raw_dir(cfg) / filename,
+        required_columns=COMMODITY_REQUIRED_COLUMNS,
+    )
+
+
 def load_all_raw(settings: Optional[dict] = None) -> dict[str, pd.DataFrame]:
     """Load all CSV files from the raw data directory."""
     cfg = settings or load_settings()
@@ -127,6 +156,25 @@ def init_database(db_path: Optional[Path] = None) -> Path:
                 created_at TEXT NOT NULL,
                 source_file TEXT,
                 report_json TEXT NOT NULL
+            )
+            """
+        )
+        # Commodity market series (Phase 1). Actual columns may be expanded via to_sql.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS commodity_market_series (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                commodity_id TEXT NOT NULL,
+                price_usd_bbl REAL,
+                inventory_mmbbl REAL,
+                frequency TEXT,
+                data_source TEXT,
+                data_type TEXT,
+                price_change_pct REAL,
+                inventory_change REAL,
+                inventory_change_pct REAL,
+                UNIQUE(date, commodity_id)
             )
             """
         )
@@ -178,3 +226,31 @@ def save_processed_csv(df: pd.DataFrame, filename: str = "industry_panel_clean.c
     out_path = out_dir / filename
     df.to_csv(out_path, index=False)
     return out_path
+
+
+def save_commodity_processed(
+    df: pd.DataFrame,
+    filename: str = "crude_oil_weekly_clean.csv",
+    table: str = "commodity_market_series",
+    db_path: Optional[Path] = None,
+) -> tuple[Path, int]:
+    """
+    Persist enriched commodity panel to processed CSV and SQLite.
+
+    Uses if_exists='replace' so re-runs are idempotent (no row accumulation).
+    Re-applies UNIQUE(date, commodity_id) after to_sql, because pandas replace
+    drops the table created by init_database() and would otherwise lose the constraint.
+    """
+    out_csv = save_processed_csv(df, filename=filename)
+    path = init_database(db_path)
+    with sqlite3.connect(path) as conn:
+        df.to_sql(table, conn, if_exists="replace", index=False)
+        # Enforce business key after replace rebuild
+        conn.execute(f"DROP INDEX IF EXISTS ux_{table}_date_commodity")
+        conn.execute(
+            f"CREATE UNIQUE INDEX ux_{table}_date_commodity "
+            f"ON {table}(date, commodity_id)"
+        )
+        conn.commit()
+        n = int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+    return out_csv, n

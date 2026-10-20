@@ -31,7 +31,15 @@ from src.data_cleaning import (  # noqa: E402
     clean_dataset,
     generate_quality_report,
 )
+from src.commodity_analytics import (  # noqa: E402
+    calendar_gap_plot_frame,
+    commodity_quality_summary,
+    filter_commodity,
+    list_commodity_ids,
+    price_inventory_change_association,
+)
 from src.data_loader import (  # noqa: E402
+    DataLoadError,
     load_from_sqlite,
     load_primary_panel,
     save_to_sqlite,
@@ -102,6 +110,40 @@ def ensure_data_ready() -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def get_panel() -> pd.DataFrame:
     return ensure_data_ready()
+
+
+@st.cache_data(show_spinner=False)
+def get_commodity_panel() -> pd.DataFrame:
+    """
+    Load crude/commodity series from SQLite analytical store only.
+
+    Does not regenerate synthetic raw CSV. Empty frame if table missing.
+    """
+    try:
+        return load_from_sqlite(table="commodity_market_series")
+    except (DataLoadError, Exception):  # noqa: BLE001
+        return pd.DataFrame()
+
+
+def get_commodity_ids() -> list[str]:
+    return list_commodity_ids(get_commodity_panel())
+
+
+def get_commodity_view(commodity_id: str | None) -> pd.DataFrame:
+    return filter_commodity(get_commodity_panel(), commodity_id=commodity_id)
+
+
+def get_commodity_qa(commodity_id: str | None) -> dict:
+    return commodity_quality_summary(get_commodity_view(commodity_id))
+
+
+def get_commodity_association(commodity_id: str | None) -> dict:
+    return price_inventory_change_association(get_commodity_view(commodity_id))
+
+
+def get_commodity_plot_frame(commodity_id: str, value_cols: tuple[str, ...] | None = None) -> pd.DataFrame:
+    view = get_commodity_view(commodity_id)
+    return calendar_gap_plot_frame(view, value_cols=list(value_cols) if value_cols else None)
 
 
 @st.cache_data(show_spinner=False)

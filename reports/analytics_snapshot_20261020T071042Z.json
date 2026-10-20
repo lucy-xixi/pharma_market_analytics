@@ -1,0 +1,316 @@
+{
+  "descriptive": [
+    {
+      "metric": "digital_index",
+      "count": 400.0,
+      "mean": 80.786,
+      "std": 14.0307,
+      "min": 43.93,
+      "25%": 70.3925,
+      "50%": 80.87,
+      "75%": 93.195,
+      "max": 100.0,
+      "skewness": -0.2869,
+      "kurtosis": -0.7897,
+      "missing": 0
+    },
+    {
+      "metric": "technology_investment",
+      "count": 400.0,
+      "mean": 51.7434,
+      "std": 12.0443,
+      "min": 24.91,
+      "25%": 43.025,
+      "50%": 50.545,
+      "75%": 59.6025,
+      "max": 85.88,
+      "skewness": 0.3355,
+      "kurtosis": -0.1862,
+      "missing": 0
+    },
+    {
+      "metric": "revenue_growth",
+      "count": 400.0,
+      "mean": 12.7486,
+      "std": 5.6324,
+      "min": 0.52,
+      "25%": 8.455,
+      "50%": 11.665,
+      "75%": 16.3925,
+      "max": 27.72,
+      "skewness": 0.4948,
+      "kurtosis": -0.5188,
+      "missing": 0
+    },
+    {
+      "metric": "employment",
+      "count": 400.0,
+      "mean": 85.0952,
+      "std": 26.8189,
+      "min": 37.6,
+      "25%": 65.25,
+      "50%": 79.5,
+      "75%": 101.75,
+      "max": 158.8,
+      "skewness": 0.6652,
+      "kurtosis": -0.181,
+      "missing": 0
+    },
+    {
+      "metric": "rd_ratio",
+      "count": 400.0,
+      "mean": 9.8947,
+      "std": 2.939,
+      "min": 5.07,
+      "25%": 7.4575,
+      "50%": 9.145,
+      "75%": 12.565,
+      "max": 16.3,
+      "skewness": 0.3905,
+      "kurtosis": -1.0891,
+      "missing": 0
+    },
+    {
+      "metric": "digital_development_index",
+      "count": 400.0,
+      "mean": 47.9921,
+      "std": 16.0791,
+      "min": 13.38,
+      "25%": 36.1025,
+      "50%": 46.08,
+      "75%": 59.3625,
+      "max": 91.51,
+      "skewness": 0.323,
+      "kurtosis": -0.5344,
+      "missing": 0
+    }
+  ],
+  "correlations": {
+    "matrix": {
+      "digital_index": {
+        "digital_index": 1.0,
+        "technology_investment": 0.8285,
+        "revenue_growth": 0.6222,
+        "employment": 0.0789,
+        "rd_ratio": 0.3725,
+        "digital_development_index": 0.8487
+      },
+      "technology_investment": {
+        "digital_index": 0.8285,
+        "technology_investment": 1.0,
+        "revenue_growth": 0.7116,
+        "employment": 0.1143,
+        "rd_ratio": 0.5171,
+        "digital_development_index": 0.9057
+      },
+      "revenue_growth": {
+        "digital_index": 0.6222,
+        "technology_investment": 0.7116,
+        "revenue_growth": 1.0,
+        "employment": -0.3845,
+        "rd_ratio": 0.6844,
+        "digital_development_index": 0.789
+      },
+      "employment": {
+        "digital_index": 0.0789,
+        "technology_investment": 0.1143,
+        "revenue_growth": -0.3845,
+        "employment": 1.0,
+        "rd_ratio": -0.2164,
+        "digital_development_index": -0.0048
+      },
+      "rd_ratio": {
+        "digital_index": 0.3725,
+        "technology_investment": 0.5171,
+        "revenue_growth": 0.6844,
+        "employment": -0.2164,
+        "rd_ratio": 1.0,
+        "digital_development_index": 0.7485
+      },
+      "digital_development_index": {
+        "digital_index": 0.8487,
+        "technology_investment": 0.9057,
+        "revenue_growth": 0.789,
+        "employment": -0.0048,
+        "rd_ratio": 0.7485,
+        "digital_development_index": 1.0
+      }
+    },
+    "vs_revenue_growth": [
+      {
+        "feature": "digital_development_index",
+        "correlation": 0.789,
+        "abs_correlation": 0.789,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "technology_investment_norm",
+        "correlation": 0.7116,
+        "abs_correlation": 0.7116,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "technology_investment",
+        "correlation": 0.7116,
+        "abs_correlation": 0.7116,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "rd_ratio",
+        "correlation": 0.6844,
+        "abs_correlation": 0.6844,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "rd_ratio_norm",
+        "correlation": 0.6844,
+        "abs_correlation": 0.6844,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "digital_index",
+        "correlation": 0.6222,
+        "abs_correlation": 0.6222,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "digital_index_norm",
+        "correlation": 0.6222,
+        "abs_correlation": 0.6222,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "employment",
+        "correlation": -0.3845,
+        "abs_correlation": 0.3845,
+        "p_value": 0.0,
+        "significant": true
+      },
+      {
+        "feature": "digital_index_yoy",
+        "correlation": -0.1304,
+        "abs_correlation": 0.1304,
+        "p_value": 0.013298,
+        "significant": true
+      },
+      {
+        "feature": "technology_investment_yoy",
+        "correlation": -0.0434,
+        "abs_correlation": 0.0434,
+        "p_value": 0.411208,
+        "significant": false
+      },
+      {
+        "feature": "employment_growth",
+        "correlation": 0.0378,
+        "abs_correlation": 0.0378,
+        "p_value": 0.451272,
+        "significant": false
+      },
+      {
+        "feature": "employment_growth_norm",
+        "correlation": 0.0378,
+        "abs_correlation": 0.0378,
+        "p_value": 0.451272,
+        "significant": false
+      },
+      {
+        "feature": "revenue_growth_yoy",
+        "correlation": -0.0136,
+        "abs_correlation": 0.0136,
+        "p_value": 0.796492,
+        "significant": false
+      }
+    ]
+  },
+  "regression": {
+    "target": "revenue_growth",
+    "features": [
+      "technology_investment",
+      "digital_index",
+      "rd_ratio",
+      "employment"
+    ],
+    "n_observations": 400,
+    "r_squared": 0.7851,
+    "adj_r_squared": 0.7829,
+    "rmse": 2.608,
+    "intercept": 12.7486,
+    "coefficients": {
+      "technology_investment": 2.7479,
+      "digital_index": 0.7729,
+      "rd_ratio": 1.67,
+      "employment": -2.1769
+    },
+    "p_values": {
+      "technology_investment": 0.0,
+      "digital_index": 0.001182,
+      "rd_ratio": 0.0,
+      "employment": 0.0
+    },
+    "std_errors": {
+      "technology_investment": 0.2623,
+      "digital_index": 0.2366,
+      "rd_ratio": 0.1635,
+      "employment": 0.14
+    },
+    "significant_features": [
+      "technology_investment",
+      "digital_index",
+      "rd_ratio",
+      "employment"
+    ],
+    "interpretation": "Model explains 78.5% of variance in revenue_growth. Strongest driver: technology_investment (positively associated). Significant features (p<0.05): technology_investment, employment, rd_ratio, digital_index."
+  },
+  "trend_summary": {
+    "by_industry_latest": [
+      {
+        "industry": "Industrial Automation",
+        "digital_index": 77.292,
+        "annual_slope": 2.0376
+      },
+      {
+        "industry": "FinTech",
+        "digital_index": 92.626,
+        "annual_slope": 1.1859
+      },
+      {
+        "industry": "Electronics Manufacturing",
+        "digital_index": 78.074,
+        "annual_slope": 1.8363
+      },
+      {
+        "industry": "E-Commerce",
+        "digital_index": 91.484,
+        "annual_slope": 1.5604
+      },
+      {
+        "industry": "Digital Media",
+        "digital_index": 89.292,
+        "annual_slope": 1.9777
+      },
+      {
+        "industry": "Cloud & Data Centers",
+        "digital_index": 96.1,
+        "annual_slope": 0.9398
+      },
+      {
+        "industry": "Software & IT Services",
+        "digital_index": 92.964,
+        "annual_slope": 1.6447
+      },
+      {
+        "industry": "Telecommunications",
+        "digital_index": 88.234,
+        "annual_slope": 2.2051
+      }
+    ]
+  }
+}

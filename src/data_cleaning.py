@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from src.config import get_db_path
-from src.data_loader import REQUIRED_COLUMNS
+from src.data_loader import COMMODITY_META_COLUMNS, COMMODITY_REQUIRED_COLUMNS, REQUIRED_COLUMNS
 
 EXPECTED_DTYPES: dict[str, str] = {
     "year": "int",
@@ -374,3 +374,222 @@ def clean_dataset(
     cleaned["year"] = cleaned["year"].astype(int)
 
     return cleaned.sort_values(["year", "industry", "region"]).reset_index(drop=True), report
+
+
+# ---------------------------------------------------------------------------
+# Commodity market cleaning (Phase 1) — does not alter clean_dataset() above
+# ---------------------------------------------------------------------------
+
+COMMODITY_EXPECTED_DTYPES: dict[str, str] = {
+    "date": "str",
+    "commodity_id": "str",
+    "price_usd_bbl": "float",
+    "inventory_mmbbl": "float",
+    "frequency": "str",
+    "data_source": "str",
+    "data_type": "str",
+}
+
+
+@dataclass
+class CommodityQualityExtras:
+    """Commodity-specific QA signals beyond the shared DataQualityReport."""
+
+    invalid_dates: int = 0
+    negative_inventory_rows: int = 0
+    time_gaps_by_commodity: dict[str, int] = field(default_factory=dict)
+    time_gap_dates_by_commodity: dict[str, list[str]] = field(default_factory=dict)
+    duplicate_key: tuple[str, ...] = ("date", "commodity_id")
+    duplicate_rows_meaning: str = (
+        "Count of excess rows flagged by DataFrame.duplicated(subset=duplicate_key); "
+        "not the size of duplicate groups."
+    )
+    extreme_price_flags: int = 0
+    notes: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def detect_time_gaps(
+    df: pd.DataFrame,
+    date_col: str = "date",
+    id_col: str = "commodity_id",
+    expected_freq: str = "W-FRI",
+) -> dict[str, int]:
+    """
+    Count missing periods vs an expected calendar for each commodity.
+
+    Does not insert rows — gaps are reported only.
+    """
+    details = detect_time_gap_dates(
+        df, date_col=date_col, id_col=id_col, expected_freq=expected_freq
+    )
+    return {cid: len(dates) for cid, dates in details.items()}
+
+
+def detect_time_gap_dates(
+    df: pd.DataFrame,
+    date_col: str = "date",
+    id_col: str = "commodity_id",
+    expected_freq: str = "W-FRI",
+) -> dict[str, list[str]]:
+    """
+    List missing calendar dates vs expected_freq for each commodity.
+
+    Interpretation: for weekly W-FRI panels, a listed date is a missing
+    week-ending observation (not a 'reasonable irregular spacing').
+    Does not invent or fill rows.
+    """
+    gaps: dict[str, list[str]] = {}
+    if date_col not in df.columns or id_col not in df.columns:
+        return gaps
+
+    work = df.copy()
+    work[date_col] = pd.to_datetime(work[date_col], errors="coerce")
+    work = work.dropna(subset=[date_col])
+
+    for cid, g in work.groupby(id_col):
+        observed = pd.DatetimeIndex(sorted(g[date_col].unique()))
+        if len(observed) < 2:
+            gaps[str(cid)] = []
+            continue
+        full = pd.date_range(observed.min(), observed.max(), freq=expected_freq)
+        missing = full.difference(observed)
+        gaps[str(cid)] = [d.strftime("%Y-%m-%d") for d in missing]
+    return gaps
+
+
+def generate_commodity_quality_report(
+    df: pd.DataFrame,
+    source: str = "crude_oil_weekly_synthetic.csv",
+    expected_freq: str = "W-FRI",
+) -> tuple[DataQualityReport, CommodityQualityExtras]:
+    """Quality report tailored for commodity time series."""
+    work = df.copy()
+    # Shared report uses industry duplicate keys by default — override after build
+    missing_counts, missing_pct = detect_missing(work)
+    base = DataQualityReport(
+        source=source,
+        n_rows=len(work),
+        n_columns=len(work.columns),
+        missing_by_column=missing_counts,
+        missing_pct_by_column=missing_pct,
+        duplicate_rows=detect_duplicates(work, subset=["date", "commodity_id"]),
+        dtype_issues=[],
+        range_violations={},
+        outlier_counts=detect_outliers_iqr(
+            work,
+            columns=[c for c in ["price_usd_bbl", "inventory_mmbbl"] if c in work.columns],
+        ),
+    )
+
+    # Dtype checks for commodity schema
+    for col, expected in COMMODITY_EXPECTED_DTYPES.items():
+        if col not in work.columns:
+            if col in COMMODITY_REQUIRED_COLUMNS:
+                base.dtype_issues.append(f"Missing column: {col}")
+            continue
+        if expected == "float":
+            coerced = pd.to_numeric(work[col], errors="coerce")
+            if coerced.isna().sum() > work[col].isna().sum():
+                base.dtype_issues.append(f"{col}: non-numeric values detected")
+
+    dates = pd.to_datetime(work["date"], errors="coerce") if "date" in work.columns else pd.Series(dtype="datetime64[ns]")
+    invalid_dates = int(dates.isna().sum()) if len(dates) else 0
+
+    neg_inv = 0
+    if "inventory_mmbbl" in work.columns:
+        inv = pd.to_numeric(work["inventory_mmbbl"], errors="coerce")
+        neg_inv = int((inv < 0).fillna(False).sum())
+
+    # Extreme prices = IQR outliers counted as flags, NOT automatic deletions
+    extreme_flags = int(base.outlier_counts.get("price_usd_bbl", 0))
+
+    gap_dates = detect_time_gap_dates(work, expected_freq=expected_freq)
+    extras = CommodityQualityExtras(
+        invalid_dates=invalid_dates,
+        negative_inventory_rows=neg_inv,
+        time_gaps_by_commodity={k: len(v) for k, v in gap_dates.items()},
+        time_gap_dates_by_commodity=gap_dates,
+        extreme_price_flags=extreme_flags,
+        notes=[
+            "duplicate_rows counts excess rows for key (date, commodity_id).",
+            "Extreme price outliers are flagged only; values are retained (markets can gap).",
+            "Negative inventory is treated as a data error and nullified during cleaning.",
+            "Negative prices are allowed (e.g. historical WTI stress scenarios in synthetic demos).",
+            "Time gaps list missing expected-frequency dates; rows are not auto-filled.",
+        ],
+    )
+    return base, extras
+
+
+def clean_commodity_dataset(
+    df: pd.DataFrame,
+    source: str = "crude_oil_weekly_synthetic.csv",
+    persist_report: bool = True,
+    expected_freq: str = "W-FRI",
+    impute_method: str = "ffill",
+) -> tuple[pd.DataFrame, DataQualityReport, CommodityQualityExtras]:
+    """
+    Commodity cleaning pipeline (backward-compatible companion to clean_dataset).
+
+    Steps:
+      1. Pre-clean quality report (incl. gaps / extreme flags)
+      2. Parse dates, coerce numerics
+      3. Drop duplicate (date, commodity_id)
+      4. Nullify negative inventory (error); keep extreme / negative prices
+      5. Limited gap-aware imputation within commodity (ffill then bfill once)
+      6. Do NOT clip price extremes
+
+    Returns cleaned frame, base quality report, commodity extras.
+    """
+    missing_cols = [c for c in COMMODITY_REQUIRED_COLUMNS if c not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Cannot clean commodity dataset; missing columns: {missing_cols}")
+
+    report, extras = generate_commodity_quality_report(
+        df, source=source, expected_freq=expected_freq
+    )
+    if persist_report:
+        try:
+            # Persist base report; extras are written alongside by the pipeline
+            persist_quality_report(report)
+        except Exception:  # noqa: BLE001
+            pass
+
+    keep_cols = [
+        c
+        for c in COMMODITY_REQUIRED_COLUMNS + COMMODITY_META_COLUMNS
+        if c in df.columns
+    ]
+    cleaned = df[keep_cols].copy()
+    cleaned["date"] = pd.to_datetime(cleaned["date"], errors="coerce")
+    cleaned = cleaned.loc[cleaned["date"].notna()].copy()
+    cleaned["commodity_id"] = cleaned["commodity_id"].astype(str).str.strip()
+    cleaned["price_usd_bbl"] = pd.to_numeric(cleaned["price_usd_bbl"], errors="coerce")
+    cleaned["inventory_mmbbl"] = pd.to_numeric(cleaned["inventory_mmbbl"], errors="coerce")
+
+    # Data errors only
+    cleaned.loc[cleaned["inventory_mmbbl"] < 0, "inventory_mmbbl"] = np.nan
+
+    cleaned = cleaned.drop_duplicates(subset=["date", "commodity_id"], keep="first")
+    cleaned = cleaned.sort_values(["commodity_id", "date"]).reset_index(drop=True)
+
+    if impute_method == "ffill":
+        for col in ["price_usd_bbl", "inventory_mmbbl"]:
+            cleaned[col] = cleaned.groupby("commodity_id", group_keys=False)[col].transform(
+                lambda s: s.ffill().bfill()
+            )
+
+    for meta in COMMODITY_META_COLUMNS:
+        if meta not in cleaned.columns:
+            if meta == "data_source":
+                cleaned[meta] = "synthetic_demo"
+            elif meta == "data_type":
+                cleaned[meta] = "synthetic"
+            elif meta == "frequency":
+                cleaned[meta] = "weekly"
+
+    cleaned["date"] = cleaned["date"].dt.strftime("%Y-%m-%d")
+    return cleaned, report, extras

@@ -2,7 +2,10 @@
 
 Enterprise metadata catalog for the **Digital Industry Analytics Platform with AI-assisted Insights**.
 
-Canonical machine-readable source: [`data_dictionary.csv`](data_dictionary.csv)
+Canonical machine-readable sources:
+
+- [`data_dictionary.csv`](data_dictionary.csv) — field-level definitions
+- [`datasets_catalog.csv`](datasets_catalog.csv) — dataset-level provenance (`synthetic` vs future `real`)
 
 ---
 
@@ -10,10 +13,12 @@ Canonical machine-readable source: [`data_dictionary.csv`](data_dictionary.csv)
 
 | Dataset | Stage | Grain | Description |
 |---------|-------|-------|-------------|
-| `digital_industry_indicators` | raw | year × industry × region | Primary multi-source panel of digital economy, investment, growth, employment, and R&D indicators |
+| `digital_industry_indicators` | raw | year × industry × region | Primary digital economy panel (synthetic demo) |
 | `technology_investment_trends` | raw | year | Thematic technology investment series (AI, cloud, IoT) |
 | `digital_employment_macro` | raw | year | Macro digital labor-market indicators |
-| `industry_panel_clean` | processed | year × industry × region | Governed analytical store after quality validation, cleaning, and indicator enrichment |
+| `industry_panel_clean` | processed | year × industry × region | Governed digital industry analytical store |
+| `crude_oil_weekly_synthetic` | raw | date × commodity_id | **SYNTHETIC** crude price/inventory weekly demo — not live market data |
+| `crude_oil_weekly_clean` | processed | date × commodity_id | Cleaned synthetic crude panel + Phase-1 features |
 
 ---
 
@@ -92,6 +97,24 @@ Inherits cleaned primary-panel fields and adds engineered indicators:
 | `digital_index` | 0.25 |
 | `rd_ratio` | 0.25 |
 | `employment_growth` | 0.20 |
+
+---
+
+## Crude oil weekly panel (Phase 1)
+
+**Disclaimer:** `crude_oil_weekly_synthetic.csv` is generated demo data (`data_type=synthetic`, `data_source=synthetic_demo`). It is suitable for pipeline and feature testing only. It is **not** EIA/ICE/NYMEX or other public live market data.
+
+| Column | Type | Unit | Nullable (raw) | Validation notes |
+|--------|------|------|----------------|------------------|
+| `date` | string (ISO date) | — | false | Must parse as date; invalid dates dropped |
+| `commodity_id` | string | — | false | Business key with `date` |
+| `price_usd_bbl` | float | USD/bbl | true | Extremes retained (incl. negative prints); IQR outliers flagged only |
+| `inventory_mmbbl` | float | mmbbl | true | Negative values treated as **errors** → nullified |
+| `frequency` | string | — | false | Demo expects `weekly` / calendar `W-FRI` |
+| `data_source` | string | — | false | Provenance label |
+| `data_type` | string | — | false | `synthetic` vs future `real` |
+
+Processed extras: `price_change_pct`, `inventory_change`, `inventory_change_pct` (lag-1 within commodity; first period null).
 
 ---
 

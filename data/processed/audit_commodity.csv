@@ -1,0 +1,5 @@
+date,commodity_id,price_usd_bbl,inventory_mmbbl,frequency,data_source,data_type,price_change_pct,inventory_change,inventory_change_pct
+2024-01-05,BRENT_CRUDE,200.0,10.0,weekly,synthetic_demo,synthetic,,,
+2024-01-12,BRENT_CRUDE,180.0,12.0,weekly,synthetic_demo,synthetic,-9.999999999999998,2.0,19.999999999999996
+2024-01-05,WTI_CRUDE,100.0,50.0,weekly,synthetic_demo,synthetic,,,
+2024-01-12,WTI_CRUDE,105.0,40.0,weekly,synthetic_demo,synthetic,5.000000000000004,-10.0,-19.999999999999996
