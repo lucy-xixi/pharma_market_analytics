@@ -1,0 +1,114 @@
+# Pharmaceutical sales panel configuration.
+# This file is the only configuration the pharma generator reads.
+# It intentionally has no digital-industry or commodity sections.
+
+project:
+  name: "Pharmaceutical Sales Analytics & Forecasting Platform"
+  version: "0.2.0"
+  description: >
+    Monthly product-region sales analytics. The checked-in file is
+    synthetic_demo data and is not a measurement of a real pharmaceutical market.
+
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  database: "database/pharma_analytics.db"
+  reports: "reports/pharma"
+  data_dictionary: "data/metadata/pharma_data_dictionary.csv"
+  data_notes: "data/metadata/PHARMA_DATA_NOTES.md"
+
+data:
+  dataset_name: "pharma_sales_monthly"
+  primary_file: "pharma_sales_monthly_synthetic.csv"
+  frequency: "MS"
+  unique_key:
+    - month
+    - product
+    - region
+  required_columns:
+    - month
+    - product
+    - region
+    - sales_amount
+    - sales_volume
+    - data_source
+    - data_type
+  allowed_data_types:
+    - synthetic_demo
+    - real
+  synthetic_data_type: "synthetic_demo"
+  synthetic_data_source: "synthetic_demo"
+  date_start: "2021-01-01"
+  date_end: "2024-12-01"
+  seed: 42
+
+bounds:
+  sales_amount_min: 0
+  sales_volume_min: 0
+
+quality:
+  negative_sales: exclude_row
+  duplicate_keys: keep_first
+  missing_months: report_only
+  outliers: flag_only
+
+evaluation:
+  # Rolling validation ends before the last test_months.
+  # Those test months score only the model already chosen on the validation folds.
+  test_months: 6
+  horizon_months: 6
+  min_train_months: 18
+  season_length: 12
+  target_column: sales_amount
+
+# Simulator knobs for the synthetic_demo file only.
+# Changing these changes the file. It does not estimate a real market.
+generator:
+  noise_scale: 0.03
+  volume_decimals: 2
+  amount_decimals: 2
+  products:
+    - id: PX-CARD-01
+      base_volume: 12000
+      unit_price: 86.0
+      monthly_trend: 0.004
+      season_amplitude: 0.06
+      peak_month: 1
+      price_drift_per_month: 0.001
+    - id: PX-ENDO-02
+      base_volume: 18000
+      unit_price: 24.0
+      monthly_trend: 0.006
+      season_amplitude: 0.08
+      peak_month: 1
+      price_drift_per_month: 0.0005
+    - id: PX-DIAB-03
+      base_volume: 22000
+      unit_price: 18.5
+      monthly_trend: 0.005
+      season_amplitude: 0.04
+      peak_month: 3
+      price_drift_per_month: 0.0008
+    - id: PX-RESP-04
+      base_volume: 9000
+      unit_price: 52.0
+      monthly_trend: 0.002
+      season_amplitude: 0.22
+      peak_month: 1
+      price_drift_per_month: 0.0
+    - id: PX-ANTI-05
+      base_volume: 14000
+      unit_price: 16.5
+      monthly_trend: -0.002
+      season_amplitude: 0.05
+      peak_month: 7
+      price_drift_per_month: 0.001
+  regions:
+    - id: East China
+      volume_multiplier: 1.20
+    - id: North China
+      volume_multiplier: 1.00
+    - id: South China
+      volume_multiplier: 0.92
+    - id: Southwest China
+      volume_multiplier: 0.74

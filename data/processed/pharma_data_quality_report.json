@@ -1,0 +1,54 @@
+{
+  "policy": {
+    "negative_sales": "exclude_row",
+    "duplicate_keys": "keep_first",
+    "missing_months": "report_only",
+    "outliers": "flag_only",
+    "invalid_dates": "exclude_row",
+    "non_numeric_sales": "exclude_row"
+  },
+  "policy_notes": [
+    "These rules are conventions for this demo project, not universal rules for real pharmaceutical sales data.",
+    "Negative sales rows are removed and are not clipped to zero.",
+    "Duplicate business keys keep the first row in the input order.",
+    "Missing months are listed and are not filled.",
+    "IQR outlier flags do not change sales values."
+  ],
+  "raw": {
+    "n_rows": 960,
+    "nulls_by_column": {},
+    "duplicate_key_excess": 0,
+    "invalid_month_rows": 0,
+    "negative_sales_amount_rows": 0,
+    "negative_sales_volume_rows": 0,
+    "non_numeric_sales_amount_rows": 0,
+    "non_numeric_sales_volume_rows": 0,
+    "outlier_flags": {
+      "sales_amount": 124,
+      "sales_volume": 0
+    },
+    "missing_month_count": 0,
+    "missing_months": []
+  },
+  "rows_excluded": 0,
+  "exclusion_counts": {
+    "invalid_or_negative_or_non_numeric": 0,
+    "duplicate_keys": 0
+  },
+  "analytical": {
+    "n_rows": 960,
+    "nulls_by_column": {},
+    "duplicate_key_excess": 0,
+    "invalid_month_rows": 0,
+    "negative_sales_amount_rows": 0,
+    "negative_sales_volume_rows": 0,
+    "non_numeric_sales_amount_rows": 0,
+    "non_numeric_sales_volume_rows": 0,
+    "outlier_flags": {
+      "sales_amount": 124,
+      "sales_volume": 0
+    },
+    "missing_month_count": 0,
+    "missing_months": []
+  }
+}

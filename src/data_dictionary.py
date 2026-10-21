@@ -1,8 +1,8 @@
 """
-Data dictionary / metadata catalog module.
+Field dictionary for the pharmaceutical sales panel.
 
-Loads enterprise field definitions from data/metadata/data_dictionary.csv
-and exposes helpers for documentation, validation, and dashboard display.
+The canonical file is data/metadata/pharma_data_dictionary.csv.
+data/metadata/data_dictionary.csv is the same pharmaceutical dictionary.
 """
 
 from __future__ import annotations
@@ -16,6 +16,8 @@ from src.config import PROJECT_ROOT
 
 DICTIONARY_PATH = PROJECT_ROOT / "data" / "metadata" / "data_dictionary.csv"
 METADATA_DOC_PATH = PROJECT_ROOT / "data" / "metadata" / "DATA_DICTIONARY.md"
+PHARMA_DICTIONARY_PATH = PROJECT_ROOT / "data" / "metadata" / "pharma_data_dictionary.csv"
+PHARMA_DATA_NOTES_PATH = PROJECT_ROOT / "data" / "metadata" / "PHARMA_DATA_NOTES.md"
 
 REQUIRED_DICTIONARY_COLUMNS = [
     "dataset_name",
@@ -64,6 +66,11 @@ def load_data_dictionary(path: Optional[Path] = None) -> pd.DataFrame:
             df[col] = df[col].astype(str).str.strip()
 
     return df.sort_values(["dataset_name", "column_name"]).reset_index(drop=True)
+
+
+def load_pharma_data_dictionary(path: Optional[Path] = None) -> pd.DataFrame:
+    """Load the pharmaceutical sales dictionary, not the legacy catalog."""
+    return load_data_dictionary(path or PHARMA_DICTIONARY_PATH)
 
 
 def list_datasets(dictionary: Optional[pd.DataFrame] = None) -> list[str]:

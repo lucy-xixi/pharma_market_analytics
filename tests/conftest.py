@@ -1,4 +1,4 @@
-"""Pytest path bootstrap for digital_industry_analytics."""
+"""Pytest path bootstrap for the pharmaceutical sales platform."""
 
 from __future__ import annotations
 

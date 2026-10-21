@@ -1,467 +1,145 @@
-# Digital Industry Analytics Platform with AI-assisted Insights
+# Pharmaceutical Sales Analytics & Forecasting Platform
 
-An **enterprise analytical data platform** for digital-industry decision support. It integrates multi-source economic, industry, and technology datasets into a governed analytics layer—covering data preparation, quality validation, indicator engineering, statistical analysis, and interactive reporting—so analysts and stakeholders can move from raw indicators to evidence-based decisions.
+月度医药销售分析与预测平台。当前数据是固定种子生成的模拟面板，产品编号和地区名称都是虚构标签。页面上的差异只描述这条模拟序列，不是真实医药市场结论。
 
-Optional LLM-assisted narrative generation can summarize validated analytical outputs; it augments the workflow and does not replace statistical methods or data controls.
+## 五个页面
 
-Built as a **Senior Digital Data Analyst** portfolio prototype: modular, reproducible, and runnable end-to-end without external AI services.
+启动后侧边栏有五个页面，并可以按月份、产品和地区筛选。数据质量页展示的是整份文件，不受筛选器影响。
 
----
+1. **销售趋势**：筛选范围内的月度销售额合计与销量合计、时间范围，以及一张双轴趋势图。
+2. **增长率**：环比是本月相对上一自然月；同比是本月相对去年同月。对比月缺失或分母为 0 时显示“无法计算”，不把缺失月当成 0，也不把无法计算显示成 0% 增长。页面同时给出各产品从首次出现月份到末次出现月份的销售额 CAGR。
+3. **产品与地区对比**：最新筛选月份的销售额、销量、销售额占比、环比和同比。销售额占比是该产品销售额除以同一月份、同一地区的产品销售额合计。
+4. **预测与模型评估**：可选总量、按产品、按地区或按产品×地区。每条序列用各自的完整历史做滚动验证并选择模型，再在最后 6 个日历月上做一次测试。月份滑块不改变这条历史。不展示预测区间。
+5. **数据质量**：原始文件与排除非法行之后的分析表分开计数。检查缺失值、重复业务键、非法日期、非数值、负值和月份缺口。IQR 异常值只标记，不删除、不改写。
 
-## Project overview
+## 界面
 
-| Layer | Capability |
-|-------|------------|
-| Multi-source integration | Ingest digital economy, technology investment, employment, and R&D indicator sources into a unified panel |
-| Analytical data preparation | Cleaning, type coercion, imputation, feature/indicator engineering, SQLite persistence |
-| Data quality validation | Missing values, duplicates, dtype checks, range rules, outlier screening, quality reports |
-| Statistical analytics | Descriptive statistics, correlation, OLS regression, trend analysis, time-series forecasting |
-| Decision support | KPI dashboards, rankings, scenario-ready forecasts, structured findings for planning |
-| Narrative enhancement (optional) | LLM or rule-based summaries grounded in computed analytics results |
+下面四张图是当前应用在 `synthetic_demo` 模拟面板上的实际页面，不是真实医药销售结果。
 
----
+销售趋势页展示全部产品和地区的月度销售额、销量，以及合计指标。
 
-## Business problem
+![销售趋势：模拟月度销售额与销量](docs/screenshots/01_sales_overview.png)
 
-Digital transformation investment is uneven across industries and regions. Organizations need a reliable analytical workspace—not a one-off chart pack—to integrate fragmented indicator sources, assure data quality, and support planning decisions such as:
+产品与地区对比页展示 2024-12 各产品在四个地区的模拟销售额。
 
-1. Where is digital development accelerating or stalling?
-2. Which measurable factors are most associated with industry revenue growth?
-3. How might digital economy indicators evolve over the next 3–5 years under current trends?
-4. What actions are supported by the statistical evidence?
+![产品与地区对比：2024-12 模拟销售额](docs/screenshots/02_product_region_analysis.png)
 
-This platform prepares multi-source panel data into governed analytical assets, produces statistical evidence and forecasts, and surfaces them through decision-support dashboards. AI-generated narrative, when enabled, helps communicate those results—it does not drive the analysis.
+预测页以总量粒度同时给出验证集指标、最终测试集指标、入选模型和未来 6 个月点预测。图中没有预测区间。
 
----
+![预测与模型评估：验证集、最终测试集和点预测](docs/screenshots/03_forecast_evaluation.png)
 
-## Architecture
+数据质量页并列展示原始表和分析表的行数、重复键、负值、缺失月，以及只标记、不改写的 IQR 计数。
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│              Decision-Support Dashboard (Streamlit)              │
-│  Overview · Indicator Analysis · Forecasting · Insight Assist.   │
-└─────────────┬───────────────────────────────────────────────────┘
-              │
-              ▼
-┌──────────────────────────┐     optional narrative enhancement
-│   Analytics Services      │────────────────────────────────┐
-│  stats · regression       │                                ▼
-│  forecasting · indicators │              ┌──────────────────────────────┐
-└─────────────┬────────────┘              │  LLM / rule-based summary     │
-              │                            │  (grounded in analytics only) │
-              ▼                            └──────────────────────────────┘
-┌──────────────────────────┐    ┌──────────────────────────────┐
-│   Analytical Data Prep    │───▶│   Analytical Store            │
-│  integrate → validate     │    │  SQLite (analytics.db)       │
-│  clean → enrich           │    │  data/processed · reports    │
-└─────────────┬────────────┘    └──────────────────────────────┘
-              │
-              ▼
-     Multi-source raw inputs
-   (digital economy, tech investment,
-    employment, R&D indicators)
-```
+![数据质量：模拟面板的检查结果](docs/screenshots/04_data_quality.png)
 
----
+指标口径：
 
-## Repository structure
+- `sales_amount` 是模拟金额，未指定真实币种，非负。
+- `sales_volume` 是模拟数量，不是真实销售包装单位或处方量，非负。
+- 业务键是 `month + product + region`。`month` 必须是月初 `YYYY-MM-01`。
+- 销售额占比的分母是同一月份、同一地区在整张分析表中的全部产品销售额。只筛选部分产品时，页面上的占比不必加总为 100%。
+- CAGR 是当前筛选时间范围内，从首个出现月份到最后出现月份的年化增长率，不是固定自然年度的增长率。
+- 重复键保留第一行、负销售额或负销量整行排除、缺失月份只报告不补 0，是当前演示项目的处理约定，不是所有真实医药数据的通用规则。
 
-```text
-digital_industry_analytics/
-├── data/
-│   ├── raw/                 # Source CSVs
-│   ├── processed/           # Cleaned / enriched outputs
-│   └── metadata/            # Data dictionary & metadata docs
-│       ├── data_dictionary.csv
-│       └── DATA_DICTIONARY.md
-├── database/
-│   └── analytics.db         # SQLite store (created by pipeline)
-├── src/
-│   ├── config.py            # Settings + .env loader
-│   ├── data_loader.py       # CSV + SQLite I/O
-│   ├── data_cleaning.py     # Validation & quality reports
-│   ├── data_dictionary.py   # Metadata catalog loader
-│   ├── indicator_engine.py  # Normalize, growth, CAGR, DDI
-│   ├── analytics.py         # Stats, correlation, regression
-│   ├── forecasting.py       # Linear trend / ARIMA / ensemble
-│   └── llm_summary.py       # LangChain insight generation
-├── dashboard/
-│   ├── app.py               # Multi-page Streamlit app
-│   ├── data_service.py      # Cached data access layer
-│   └── export_utils.py      # Chart/table PNG export helpers
-├── notebooks/               # Exploratory analysis notebook
-├── reports/
-│   ├── screenshots/
-│   │   ├── overview.png
-│   │   ├── data_quality.png
-│   │   ├── indicators.png
-│   │   ├── forecasting.png
-│   │   └── ai_insight.png
-│   └── *.json               # Pipeline analytics snapshots
-├── config/settings.yaml     # Project configuration
-├── scripts/
-│   ├── generate_sample_data.py
-│   ├── run_pipeline.py
-│   └── export_portfolio_charts.py
-├── requirements.txt
-├── .env.example
-└── README.md
-```
+## 技术栈
 
----
+Python 3.10+、pandas、NumPy、SciPy、statsmodels（ARIMA）、Streamlit、Plotly、PyYAML、pytest。不调用外部 API。
 
-## Data pipeline
+## 数据
 
-1. **Ingest** — Load panel CSV (`year`, `industry`, `region`, digital & economic indicators).
-2. **Quality** — Detect missing values, duplicates, dtype issues, range violations, IQR outliers; emit JSON quality report.
-3. **Clean** — Coerce types, drop duplicate keys, impute via industry–region medians, clip to business bounds.
-4. **Enrich** — Employment growth, normalized components, composite **Digital Development Index**.
-5. **Persist** — Write `data/processed/` + SQLite `industry_indicators`.
-6. **Analyze** — Snapshot descriptive / correlation / regression results to `reports/`.
+唯一原始输入是 `data/raw/pharma_sales_monthly_synthetic.csv`。
 
-### Digital Development Index (DDI)
+- 生成命令：`python scripts/generate_pharma_data.py`
+- 配置：`config/pharma_settings.yaml`，种子 42
+- 网格：2021-01 至 2024-12，5 个虚构产品，4 个虚构地区，共 960 行
+- 每行 `data_type=synthetic_demo`，`data_source=synthetic_demo`
+- 字段说明：`data/metadata/PHARMA_DATA_NOTES.md` 与 `data/metadata/pharma_data_dictionary.csv`
 
-Digital Development Index:
+生成器不读取其他 CSV。负销售额和负销量会从分析表排除，不截成 0。重复键保留输入中的第一行。缺失月份只报告，不补 0。这三项是本演示的约定。模拟序列上的差异不能解释成真实市场份额或商业机会。
 
-DDI = 100 × Σ(weight × normalized indicator)
+## 安装与启动
 
-Default weights (`config/settings.yaml`):
-
-| Component | Weight |
-|-----------|--------|
-| Technology investment | 0.30 |
-| Digital adoption (`digital_index`) | 0.25 |
-| R&D intensity (`rd_ratio`) | 0.25 |
-| Employment growth | 0.20 |
-
----
-
-## Analytics methodology
-
-| Method | Purpose |
-|--------|---------|
-| Descriptive statistics | Distribution, skewness, kurtosis of indicators |
-| Pearson correlation | Pairwise association; heatmap in dashboard |
-| Target correlation ranking | Features vs `revenue_growth` with p-values |
-| OLS linear regression (standardized) | Drivers of revenue growth (R², RMSE, significance) |
-| Linear trend forecast | Extrapolate annual means with prediction intervals |
-| ARIMA(1,1,1) | Short-horizon stochastic forecast (statsmodels) |
-| Ensemble | Average of linear + ARIMA projections |
-
-**Example questions the modules target**
-
-- What factors influence digital industry growth?
-- What is the relationship between technology investment and revenue growth?
-
----
-
-## Narrative enhancement (optional AI)
-
-AI is an optional layer on top of validated analytics—not the core of the platform. `src/llm_summary.py` packages statistical and forecast outputs into a context pack, then:
-
-1. Optionally invokes a LangChain chat model (`langchain-openai` / OpenAI-compatible) to draft an executive narrative.
-2. Returns a fixed decision-support schema:
-
-```json
-{
-  "summary": "...",
-  "key_findings": ["..."],
-  "drivers": ["..."],
-  "recommendations": ["..."]
-}
-```
-
-3. If no API key is configured (or the call fails), a **rule-based summarizer** fills the same schema from coefficients and correlations, so decision-support demos remain offline-capable.
-
----
-
-## Dashboard pages
-
-| Page | Contents |
-|------|----------|
-| **Overview** | Compact data-ready status, 4 primary KPIs, Digital Index trend, regional & industry views |
-| **Data Quality** | Intake vs analytical-store monitoring, validation status, quality score |
-| **Indicator Analysis** | Leaders ranking, distributions, investment–growth relationship, correlations, drivers |
-| **Forecasting** | Outlook statement, forecast path with confidence band, diagnostics in expanders |
-| **Insight Assistant** | Optional narrative over analytics outputs → structured decision-support report |
-
----
-
-## Screenshots
-
-Portfolio visuals live in [`reports/screenshots/`](reports/screenshots/). After you capture the Streamlit UI (see below), GitHub will render these images in the README.
-
-### Overview Dashboard
-
-![Overview Dashboard](reports/screenshots/overview.png)
-
-### Data Quality Dashboard
-
-![Data Quality Dashboard](reports/screenshots/data_quality.png)
-
-### Indicator Analysis
-
-![Indicator Analysis](reports/screenshots/indicators.png)
-
-### Forecasting Dashboard
-
-![Forecasting Dashboard](reports/screenshots/forecasting.png)
-
-### AI Insight Assistant
-
-![AI Insight Assistant](reports/screenshots/ai_insight.png)
-
----
-
-## How to capture screenshots for the portfolio
-
-Use these steps so the README images above display correctly on GitHub.
-
-### 1. Run the app
+在仓库根目录：
 
 ```bash
-cd digital_industry_analytics
-streamlit run dashboard/app.py
-```
-
-Open `http://localhost:8501`. Prefer a wide browser window (≈1440px+) for cleaner captures.
-
-### 2. Capture each page
-
-| README file | Sidebar page | What to show in frame |
-|-------------|--------------|------------------------|
-| `reports/screenshots/overview.png` | Overview Dashboard | Quality metrics + KPI cards + at least one trend chart |
-| `reports/screenshots/data_quality.png` | Data Quality Monitoring | Scorecards + intake vs analytical-store comparison |
-| `reports/screenshots/indicators.png` | Indicator Analysis | Ranking chart + correlation heatmap |
-| `reports/screenshots/forecasting.png` | Forecasting | Historical + forecast chart with interval band |
-| `reports/screenshots/ai_insight.png` | AI Insight Assistant | Generated summary / findings / recommendations |
-
-**Windows:** `Win + Shift + S` (Snipping Tool) or Win + Print Screen  
-**macOS:** `Cmd + Shift + 4`  
-**Chrome:** DevTools → Ctrl/Cmd+Shift+P → “Capture full size screenshot” (good for long pages)
-
-Save/export as PNG using **exactly** the filenames in the table (lowercase, underscores).
-
-### 3. Automated full-page capture (recommended)
-
-With the dashboard running on `http://localhost:8501`:
-
-```bash
-pip install playwright
-python -m playwright install chromium
-python scripts/capture_dashboard_screenshots.py
-```
-
-This writes **full dashboard page** screenshots (sidebar + main content) to:
-
-- `reports/screenshots/overview.png`
-- `reports/screenshots/data_quality.png`
-- `reports/screenshots/indicators.png`
-- `reports/screenshots/forecasting.png`
-- `reports/screenshots/ai_insight.png`
-
-### 4. Optional: export individual charts & tables
-
-For chart-level assets only (not full UI pages):
-
-- **In the app:** sidebar **Portfolio export** → **Export key charts & tables**
-- **CLI:** `pip install kaleido` then `python scripts/export_portfolio_charts.py`
-
-### 5. Commit for GitHub
-
-```bash
-git add reports/screenshots/*.png README.md
-git commit -m "Add portfolio dashboard screenshots"
-```
-
-Confirm the relative paths in this README stay as `reports/screenshots/<name>.png`.
-
----
-
-## How to run
-
-### 1. Environment
-
-```bash
-cd digital_industry_analytics
 python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
-copy .env.example .env   # Windows
-# cp .env.example .env   # macOS / Linux
 ```
 
-Optional: set `OPENAI_API_KEY` (and `OPENAI_BASE_URL` if using a compatible gateway) in `.env`.
+Windows PowerShell：
 
-### 2. Generate data & run pipeline
-
-```bash
-python scripts/generate_sample_data.py
-python scripts/run_pipeline.py
-```
-
-Or in one step:
-
-```bash
-python scripts/run_pipeline.py --generate
-```
-
-### 3. Launch dashboard
-
-From the project root (`digital_industry_analytics/`):
-
-```bash
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python scripts/generate_pharma_data.py
+python scripts/run_pharma_pipeline.py
 streamlit run dashboard/app.py
 ```
 
-Open the local URL shown in the terminal (typically `http://localhost:8501`).
+`scripts/run_pipeline.py` 与 `scripts/run_pharma_pipeline.py` 是同一个医药流水线。它写出：
 
-### 4. Notebook exploration
+- `data/processed/pharma_sales_monthly_clean.csv`
+- `data/processed/pharma_data_quality_report.json`
+- `database/pharma_analytics.db`（表 `pharma_sales_monthly`）
+- `reports/pharma/forecast_total.json`
 
-```bash
-jupyter notebook notebooks/01_exploratory_analysis.ipynb
-```
+仪表盘直接读取原始 CSV 并在内存中做同样的校验，不依赖上面的导出文件才能打开。
 
----
+## 测试
 
-## Configuration
-
-Primary settings live in [`config/settings.yaml`](config/settings.yaml):
-
-- Indicator weights and normalization method
-- Regression target / features
-- Forecast horizon and ARIMA order
-- LLM model & temperature
-- Dashboard theme primary color
-
-Environment overrides: `.env` / `.env.example`.
-
----
-
-## Sample datasets
-
-Synthetic but realistic panel data (2015–2024) covering:
-
-- Digital economy indicators (`digital_index`)
-- Technology investment (USD billions)
-- Industry revenue growth (%)
-- Employment (thousands)
-- R&D intensity (`rd_ratio`)
-
-Plus supplementary series:
-
-- `technology_investment_trends.csv` — AI / cloud / IoT investment
-- `digital_employment_macro.csv` — digital jobs & skills gap
-
-Raw files intentionally include missing values and duplicates so the cleaning module can demonstrate quality controls.
-
-### Phase 1 commodity extension (crude — synthetic demo)
-
-Additive pipeline branch for crude oil **weekly** price/inventory panels:
-
-- Raw: `data/raw/crude_oil_weekly_synthetic.csv` (`data_type=synthetic`, `data_source=synthetic_demo`)
-- Processed: `data/processed/crude_oil_weekly_clean.csv` + SQLite table `commodity_market_series`
-- Features (`src/commodity_features.py`): `price_change_pct`, `inventory_change`, `inventory_change_pct`
-- Catalog: `data/metadata/datasets_catalog.csv`
-
-**Not included in Phase 1:** Streamlit commodity pages, crude forecasting UI, or live public market feeds. The synthetic file must not be described as real EIA/ICE/NYMEX data.
+在仓库根目录：
 
 ```bash
-python scripts/generate_commodity_data.py
-python scripts/run_pipeline.py
-pytest tests/ -q
+python -m pytest tests -q --tb=short
 ```
 
----
+## 目录
 
-## Data dictionary & metadata
-
-Enterprise field catalog for multi-source integration and analytical preparation.
-
-| Artifact | Location |
-|----------|----------|
-| Machine-readable dictionary | [`data/metadata/data_dictionary.csv`](data/metadata/data_dictionary.csv) |
-| Metadata documentation | [`data/metadata/DATA_DICTIONARY.md`](data/metadata/DATA_DICTIONARY.md) |
-| Python module | [`src/data_dictionary.py`](src/data_dictionary.py) |
-
-### Catalog attributes
-
-| Attribute | Purpose |
-|-----------|---------|
-| Dataset name | Logical source / analytical table |
-| Column name | Field identifier |
-| Description | Technical definition |
-| Data type | Logical type (`integer` / `float` / `string`) |
-| Business meaning | Decision-relevant interpretation |
-
-### Datasets in scope
-
-| Dataset | Stage | Grain |
-|---------|-------|-------|
-| `digital_industry_indicators` | raw | year × industry × region |
-| `technology_investment_trends` | raw | year |
-| `digital_employment_macro` | raw | year |
-| `industry_panel_clean` | processed | year × industry × region |
-
-### Primary panel metadata
-
-| Column | Data type | Description | Business meaning |
-|--------|-----------|-------------|------------------|
-| `year` | integer | Calendar year of the observation | Time dimension for trend analysis and forecasting |
-| `industry` | string | Industry segment within the digital economy value chain | Business segment used for peer benchmarking and ranking |
-| `region` | string | Geographic market region of the observation | Spatial dimension for regional comparison and capacity targeting |
-| `digital_index` | float | Composite score of digital adoption and maturity | Proxy for digitalization level used in development benchmarking |
-| `technology_investment` | float | Annual technology capital and operating investment | Input intensity of digital transformation spending |
-| `revenue_growth` | float | Yearly revenue growth rate | Primary business outcome / growth performance indicator |
-| `employment` | float | Headcount engaged in the industry-region economy | Labor scale supporting digital industry activity |
-| `rd_ratio` | float | R&D expenditure as a share of revenue | Innovation intensity and future capability signal |
-
-### Analytical store additions (`industry_panel_clean`)
-
-| Column | Data type | Business meaning |
-|--------|-----------|------------------|
-| `employment_growth` | float | YoY labor expansion; DDI component |
-| `digital_development_index` | float | Weighted composite digital development KPI (0–100) |
-| `*_norm` | float | Normalized components for index construction |
-| `*_yoy` | float | Short-term momentum indicators |
-
-```python
-from src.data_dictionary import load_data_dictionary, get_dataset_dictionary
-
-dd = load_data_dictionary()
-get_dataset_dictionary("digital_industry_indicators")[
-    ["column_name", "data_type", "business_meaning"]
-]
+```text
+dashboard/app.py                 Streamlit 入口
+dashboard/data_service.py        读取、筛选、合计与预测缓存
+src/config.py                    读取 config/pharma_settings.yaml
+src/pharma_schema.py             字段契约与模拟公式
+src/pharma_quality.py            原始画像、排除规则、分析表
+src/pharma_features.py           环比、同比、占比、CAGR
+src/pharma_forecast.py           按时间切分的预测评估
+src/data_dictionary.py           字段字典读取
+scripts/generate_pharma_data.py  生成 synthetic_demo CSV
+scripts/run_pharma_pipeline.py   清洗、入库、写出预测报告
+config/pharma_settings.yaml
+data/raw/pharma_sales_monthly_synthetic.csv
+data/processed/
+data/metadata/
+database/pharma_analytics.db
+reports/pharma/forecast_total.json
+tests/
 ```
 
----
+## 预测评估与局限
 
-## Code quality practices
+预测可以按四条口径分别进行，每条序列单独排序、验证和评估，不会把不同产品或地区的时间序列放进同一个模型：
 
-- Modular package under `src/` with clear separation of concerns
-- Type hints on public functions
-- Explicit error types (`DataLoadError`) and guarded LLM / ARIMA fallbacks
-- YAML + dotenv configuration (no hardcoded secrets)
-- Data quality reports persisted alongside analytics snapshots
+- **总量**：所选产品与地区的月度销售额合计。流水线写出的 `reports/pharma/forecast_total.json` 使用这一口径。
+- **按产品**：每个所选产品一条序列，金额是该产品在所选地区内的月度合计。
+- **按地区**：每个所选地区一条序列，金额是该地区在所选产品内的月度合计。
+- **按产品×地区**：每个产品与地区组合一条序列。
 
----
+月份滑块只改变趋势、增长率和对比页的显示范围。预测使用所选实体的完整可用历史。
 
-## Suggested portfolio talking points
+- 最终测试集是该序列最后 6 个日历月。它不参与模型选择。
+- 在测试集之前做滚动验证：初始训练至少 18 个月，预测步长 6 个月，每 6 个月滚动一次。验证窗必须在最终测试期之前结束。
+- 历史不足以形成至少一个验证折时，状态为 `insufficient_history`。不会改用最终测试集来选模型。
+- 选择指标是验证集 MAE 与 RMSE 的平均名次。平局时优先朴素基线、季节性朴素、线性趋势、ARIMA。
+- 模型选定后，才报告该模型在最终测试集上的 MAE、RMSE。MAPE 只作描述，并记录排除的零值月；实际销售额较小时 MAPE 可能被放大。
+- 朴素基线重复训练期最后一个观测值。季节性朴素模型只在训练期不少于 12 个月且能找到去年同月时参与比较。
+- 线性趋势按日历月序号拟合。序列内部有缺口时，不把后面的观测前移成连续月份。
+- ARIMA 按固定顺序尝试 `(1,1,1)`、`(1,1,0)`、`(0,1,1)`，只在训练期上拟合。训练期内有缺失月时不把观测序号当成连续月份，该折标记失败。没有用测试集选择阶数。
+- 测试指标记录之后，用该序列的全部历史重新拟合入选模型，给出之后 6 个月的点预测。
+- 不提供预测区间。结果里的 `intervals` 为空。
+- 缺失月只给出警告，不填成 0。全 0 序列可以计算点误差，但 MAPE 不能解释为预测性能。
 
-1. **Data quality first** — show the pre-clean quality JSON and cleaning decisions.
-2. **Composite index design** — justify DDI weights with domain reasoning.
-3. **Causal humility** — present regression as associative evidence, not pure causation.
-4. **Forecast uncertainty** — highlight confidence bands and model diagnostics (R² / AIC).
-5. **AI as augmentation** — LLM structures narrative from *computed* stats; rule-based path proves reliability.
+这些数字只描述模拟序列。
 
----
+## 后续可以做的事
 
-## License
-
-MIT — adapt freely for portfolio and educational use.
+- 在有授权和字段说明之后接入 `data_type=real` 的月度销售表。接入时要重新确认去重、负值和缺失月规则，不能直接把演示约定当成通用业务规则。
+- 在单独的验证设计下补充预测区间，而不是用未检验的区间填图。

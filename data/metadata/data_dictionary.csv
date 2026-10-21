@@ -1,51 +1,8 @@
 dataset_name,column_name,description,data_type,business_meaning,unit,nullable,source_stage
-digital_industry_indicators,year,Calendar year of the observation,integer,Time dimension for trend analysis and forecasting,year,false,raw
-digital_industry_indicators,industry,Industry segment within the digital economy value chain,string,Business segment used for peer benchmarking and ranking,,false,raw
-digital_industry_indicators,region,Geographic market region of the observation,string,Spatial dimension for regional comparison and capacity targeting,,false,raw
-digital_industry_indicators,digital_index,Composite score of digital adoption and maturity for the industry-region cell,float,Proxy for digitalization level used in development benchmarking,index_0_100,true,raw
-digital_industry_indicators,technology_investment,Annual technology capital and operating investment,float,Input intensity of digital transformation spending,USD_billions,false,raw
-digital_industry_indicators,revenue_growth,Yearly revenue growth rate for the industry-region cell,float,Primary business outcome / growth performance indicator,percent,false,raw
-digital_industry_indicators,employment,Headcount engaged in the industry-region economy,float,Labor scale supporting digital industry activity,thousands_of_persons,true,raw
-digital_industry_indicators,rd_ratio,Research and development expenditure as a share of revenue,float,Innovation intensity and future capability signal,percent_of_revenue,true,raw
-technology_investment_trends,year,Calendar year of thematic technology investment,integer,Time key for thematic investment series,year,false,raw
-technology_investment_trends,ai_investment_bn,Aggregate investment in artificial intelligence capabilities,float,Capital flowing into AI platforms models and applications,USD_billions,false,raw
-technology_investment_trends,cloud_investment_bn,Aggregate investment in cloud infrastructure and services,float,Cloud capacity build-out supporting digital workloads,USD_billions,false,raw
-technology_investment_trends,iot_investment_bn,Aggregate investment in Internet of Things deployments,float,Connected-device and industrial IoT spend,USD_billions,false,raw
-digital_employment_macro,year,Calendar year of macro digital labor indicators,integer,Time key for labor-market digitalization series,year,false,raw
-digital_employment_macro,digital_jobs_million,Estimated stock of digital-economy jobs,float,Scale of digitally intensive employment,millions_of_persons,false,raw
-digital_employment_macro,skills_gap_index,Index of unmet digital skills demand relative to supply,float,Workforce readiness risk for digital transformation,index_higher_worse,false,raw
-digital_employment_macro,remote_work_share,Share of digital roles performed remotely,float,Flexibility of digital labor supply,percent,false,raw
-industry_panel_clean,year,Calendar year after cleaning and validation,integer,Governed time dimension in the analytical store,year,false,processed
-industry_panel_clean,industry,Validated industry segment label,string,Analytical grouping for industry KPIs and rankings,,false,processed
-industry_panel_clean,region,Validated geographic region label,string,Analytical grouping for regional comparison,,false,processed
-industry_panel_clean,digital_index,Cleaned digital adoption score,float,Digital maturity input to the Digital Development Index,index_0_100,false,processed
-industry_panel_clean,technology_investment,Cleaned technology investment amount,float,Investment input to growth models and DDI,USD_billions,false,processed
-industry_panel_clean,revenue_growth,Cleaned revenue growth rate,float,Dependent variable for driver analysis,percent,false,processed
-industry_panel_clean,employment,Cleaned employment level,float,Labor input for growth and capacity analysis,thousands_of_persons,false,processed
-industry_panel_clean,rd_ratio,Cleaned R&D intensity ratio,float,Innovation intensity input to DDI and regression,percent_of_revenue,false,processed
-industry_panel_clean,employment_growth,Year-over-year percentage change in employment,float,Labor expansion signal used as a DDI component,percent,false,processed
-industry_panel_clean,technology_investment_norm,Min-max normalized technology investment,float,Comparable scale factor for composite index construction,normalized_0_1,false,processed
-industry_panel_clean,digital_index_norm,Min-max normalized digital index,float,Comparable scale factor for composite index construction,normalized_0_1,false,processed
-industry_panel_clean,rd_ratio_norm,Min-max normalized R&D ratio,float,Comparable scale factor for composite index construction,normalized_0_1,false,processed
-industry_panel_clean,employment_growth_norm,Min-max normalized employment growth,float,Comparable scale factor for composite index construction,normalized_0_1,false,processed
-industry_panel_clean,digital_development_index,Weighted composite Digital Development Index,float,Enterprise KPI summarizing digital development readiness,index_0_100,false,processed
-industry_panel_clean,digital_index_yoy,Year-over-year change in digital index,float,Short-term digitalization momentum,percent,true,processed
-industry_panel_clean,technology_investment_yoy,Year-over-year change in technology investment,float,Short-term investment acceleration,percent,true,processed
-industry_panel_clean,revenue_growth_yoy,Year-over-year change in revenue growth rate,float,Acceleration or deceleration of growth performance,percent,true,processed
-crude_oil_weekly_synthetic,date,Observation date (week-ending Friday in demo generator),string,Time key for weekly crude market series,ISO8601_date,false,raw
-crude_oil_weekly_synthetic,commodity_id,Commodity contract / stream identifier (e.g. WTI_CRUDE),string,Entity key for multi-commodity panels,,false,raw
-crude_oil_weekly_synthetic,price_usd_bbl,Spot-style price level in US dollars per barrel,float,Primary price series for returns and scenario analysis,USD_per_barrel,true,raw
-crude_oil_weekly_synthetic,inventory_mmbbl,Inventory / stocks level,float,Supply-side stock indicator used for inventory change features,million_barrels,true,raw
-crude_oil_weekly_synthetic,frequency,Declared sampling frequency of the series,string,Documents cadence (weekly in Phase 1 demo),,false,raw
-crude_oil_weekly_synthetic,data_source,Provenance label for the row,string,Must be synthetic_demo for this file — not a live exchange feed,,false,raw
-crude_oil_weekly_synthetic,data_type,synthetic or real classification,string,Hard flag separating demo data from real public market data,,false,raw
-crude_oil_weekly_clean,date,Cleaned observation date,string,Governed time key after validation,ISO8601_date,false,processed
-crude_oil_weekly_clean,commodity_id,Validated commodity identifier,string,Grouping key for feature engineering,,false,processed
-crude_oil_weekly_clean,price_usd_bbl,Cleaned price (extremes retained),float,Price input for change-rate features; negatives allowed,USD_per_barrel,false,processed
-crude_oil_weekly_clean,inventory_mmbbl,Cleaned inventory (negative values nullified as errors),float,Inventory input for change features,million_barrels,false,processed
-crude_oil_weekly_clean,frequency,Sampling frequency label,string,Expected weekly cadence documentation,,false,processed
-crude_oil_weekly_clean,data_source,Provenance label retained through pipeline,string,Tracks synthetic vs future real feeds,,false,processed
-crude_oil_weekly_clean,data_type,synthetic or real classification retained,string,Prevents mislabeling demo data as live market data,,false,processed
-crude_oil_weekly_clean,price_change_pct,Period-over-period price return,float,Look-back return; first period per commodity is null,percent,true,processed
-crude_oil_weekly_clean,inventory_change,Period-over-period inventory difference,float,Absolute stock change vs prior week,million_barrels,true,processed
-crude_oil_weekly_clean,inventory_change_pct,Period-over-period inventory percentage change,float,Relative stock change; prior<=0 yields null,percent,true,processed
+pharma_sales_monthly,month,Month-start date of the sales observation,date,Time key for monthly trend growth and later forecasting. The demo uses the first day of each month.,month,false,raw
+pharma_sales_monthly,product,Product identifier,string,Product dimension for comparison. Demo identifiers are fictional codes and are not marketed SKUs.,,false,raw
+pharma_sales_monthly,region,Region identifier,string,Geographic grouping key. Demo region names and scale differences are simulator labels and are not measured market sizes.,,false,raw
+pharma_sales_monthly,sales_amount,Sales value for the product-region-month,float,Non-negative simulated sales value. Demo amounts come from a planted price and volume formula and have no real currency.,模拟金额，未指定真实币种,false,raw
+pharma_sales_monthly,sales_volume,Sales quantity for the product-region-month,float,Non-negative simulated quantity. Demo volumes are not packs dispensed or prescriptions written.,模拟数量，非真实销售包装单位或处方量,false,raw
+pharma_sales_monthly,data_source,Name of the providing process or system,string,synthetic_demo marks rows produced by scripts/generate_pharma_data.py. A future authorized feed must use its own source name.,,false,raw
+pharma_sales_monthly,data_type,Provenance class,string,"Allowed values are synthetic_demo and real. synthetic_demo rows must not be described as real pharmaceutical market measurements.",,false,raw

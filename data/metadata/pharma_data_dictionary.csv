@@ -1,0 +1,8 @@
+dataset_name,column_name,description,data_type,business_meaning,unit,nullable,source_stage
+pharma_sales_monthly,month,Month-start date of the sales observation,date,Time key for monthly trend growth and later forecasting. The demo uses the first day of each month.,month,false,raw
+pharma_sales_monthly,product,Product identifier,string,Product dimension for comparison. Demo identifiers are fictional codes and are not marketed SKUs.,,false,raw
+pharma_sales_monthly,region,Region identifier,string,Geographic grouping key. Demo region names and scale differences are simulator labels and are not measured market sizes.,,false,raw
+pharma_sales_monthly,sales_amount,Sales value for the product-region-month,float,Non-negative simulated sales value. Demo amounts come from a planted price and volume formula and have no real currency.,模拟金额，未指定真实币种,false,raw
+pharma_sales_monthly,sales_volume,Sales quantity for the product-region-month,float,Non-negative simulated quantity. Demo volumes are not packs dispensed or prescriptions written.,模拟数量，非真实销售包装单位或处方量,false,raw
+pharma_sales_monthly,data_source,Name of the providing process or system,string,synthetic_demo marks rows produced by scripts/generate_pharma_data.py. A future authorized feed must use its own source name.,,false,raw
+pharma_sales_monthly,data_type,Provenance class,string,"Allowed values are synthetic_demo and real. synthetic_demo rows must not be described as real pharmaceutical market measurements.",,false,raw

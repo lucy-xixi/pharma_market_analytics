@@ -1,0 +1,542 @@
+{
+  "status": "ok",
+  "reason": "验证期 2022-07-01 至 2024-06-01 （4 折）用于选择模型。最终测试期 2024-07-01 至 2024-12-01 未参与模型选择。选定模型 seasonal_naive 的测试 MAE=466676.805，RMSE=482385.794，MAPE=4.052 （排除零值月 0）。MAPE 只描述最终测试集，不参与模型选择。实际值为 0 的月份已排除。实际销售额较小时，MAPE 会被放大。 向前预测在记录测试指标之后，用全部历史重新拟合选定模型。",
+  "target": "sales_amount",
+  "test_months": 6,
+  "horizon_months": 6,
+  "min_train_months": 18,
+  "validation_horizon_months": 6,
+  "validation_step_months": 6,
+  "n_history": 48,
+  "n_train": 42,
+  "n_test": 6,
+  "n_validation_folds": 4,
+  "train_start": "2021-01-01",
+  "train_end": "2024-06-01",
+  "validation_start": "2022-07-01",
+  "validation_end": "2024-06-01",
+  "test_start": "2024-07-01",
+  "test_end": "2024-12-01",
+  "models": {
+    "naive": {
+      "display_name": "朴素基线（上一观测值）",
+      "role": "baseline",
+      "metric_window": "validation",
+      "mape": null,
+      "status": "ok",
+      "reason": "",
+      "mae": 615699.9895833336,
+      "rmse": 794570.3880438219,
+      "mae_rank": 4.0,
+      "rmse_rank": 4.0,
+      "average_rank": 4.0
+    },
+    "seasonal_naive": {
+      "display_name": "季节性朴素基线（去年同月）",
+      "role": "baseline",
+      "metric_window": "validation",
+      "mape": null,
+      "status": "ok",
+      "reason": "",
+      "mae": 538941.3745833335,
+      "rmse": 552396.7019036133,
+      "mae_rank": 1.0,
+      "rmse_rank": 1.0,
+      "average_rank": 1.0
+    },
+    "linear_trend": {
+      "display_name": "线性趋势",
+      "role": "time_series",
+      "metric_window": "validation",
+      "mape": null,
+      "status": "ok",
+      "reason": "",
+      "mae": 546660.7236160618,
+      "rmse": 612364.5607699256,
+      "mae_rank": 2.0,
+      "rmse_rank": 2.0,
+      "average_rank": 2.0
+    },
+    "arima": {
+      "display_name": "ARIMA",
+      "role": "time_series",
+      "metric_window": "validation",
+      "mape": null,
+      "status": "ok",
+      "reason": "",
+      "mae": 601649.3240812499,
+      "rmse": 772608.6479398145,
+      "mae_rank": 3.0,
+      "rmse_rank": 3.0,
+      "average_rank": 3.0
+    }
+  },
+  "validation_folds": [
+    {
+      "fold": 1,
+      "train_start": "2021-01-01",
+      "train_end": "2022-06-01",
+      "n_train": 18,
+      "val_start": "2022-07-01",
+      "val_end": "2022-12-01",
+      "n_val": 6,
+      "models": {
+        "naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 750974.8416666674,
+          "rmse": 963014.9344440254
+        },
+        "seasonal_naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 526227.471666667,
+          "rmse": 546555.3551623011
+        },
+        "linear_trend": {
+          "status": "ok",
+          "reason": "",
+          "mae": 500012.2543395255,
+          "rmse": 566337.6365865703,
+          "train_slope": 34566.535995872015,
+          "train_intercept": 10016848.90403509
+        },
+        "arima": {
+          "status": "ok",
+          "reason": "",
+          "mae": 736405.3282834605,
+          "rmse": 944260.6608749168,
+          "fitted_name": "arima(1, 1, 1)",
+          "display_name": "arima(1, 1, 1)"
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2021-01-01",
+      "train_end": "2022-12-01",
+      "n_train": 24,
+      "val_start": "2023-01-01",
+      "val_end": "2023-06-01",
+      "n_val": 6,
+      "models": {
+        "naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 435004.3699999998,
+          "rmse": 522701.61823408806
+        },
+        "seasonal_naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 560793.4916666666,
+          "rmse": 562943.5554002485
+        },
+        "linear_trend": {
+          "status": "ok",
+          "reason": "",
+          "mae": 567832.8291118359,
+          "rmse": 632784.9534381703,
+          "train_slope": 34920.75520434783,
+          "train_intercept": 9989093.780566666
+        },
+        "arima": {
+          "status": "ok",
+          "reason": "",
+          "mae": 426258.27189903083,
+          "rmse": 503324.6478930608,
+          "fitted_name": "arima(1, 1, 1)",
+          "display_name": "arima(1, 1, 1)"
+        }
+      }
+    },
+    {
+      "fold": 3,
+      "train_start": "2021-01-01",
+      "train_end": "2023-06-01",
+      "n_train": 30,
+      "val_start": "2023-07-01",
+      "val_end": "2023-12-01",
+      "n_val": 6,
+      "models": {
+        "naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 737583.7366666673,
+          "rmse": 992655.3190633573
+        },
+        "seasonal_naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 551385.3083333332,
+          "rmse": 567634.5426359469
+        },
+        "linear_trend": {
+          "status": "ok",
+          "reason": "",
+          "mae": 594563.467440242,
+          "rmse": 655107.2114472586,
+          "train_slope": 43324.62004671858,
+          "train_intercept": 9934264.800989246
+        },
+        "arima": {
+          "status": "ok",
+          "reason": "",
+          "mae": 725100.084400467,
+          "rmse": 974088.8561127348,
+          "fitted_name": "arima(1, 1, 1)",
+          "display_name": "arima(1, 1, 1)"
+        }
+      }
+    },
+    {
+      "fold": 4,
+      "train_start": "2021-01-01",
+      "train_end": "2023-12-01",
+      "n_train": 36,
+      "val_start": "2024-01-01",
+      "val_end": "2024-06-01",
+      "n_val": 6,
+      "models": {
+        "naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 539237.0100000001,
+          "rmse": 699909.6804338166
+        },
+        "seasonal_naive": {
+          "status": "ok",
+          "reason": "",
+          "mae": 517359.22666666686,
+          "rmse": 532453.3544159562
+        },
+        "linear_trend": {
+          "status": "ok",
+          "reason": "",
+          "mae": 524234.3435726439,
+          "rmse": 595228.4416077035,
+          "train_slope": 41224.692817245814,
+          "train_intercept": 9944314.667087087
+        },
+        "arima": {
+          "status": "ok",
+          "reason": "",
+          "mae": 518833.6117420411,
+          "rmse": 668760.4268785457,
+          "fitted_name": "arima(1, 1, 1)",
+          "display_name": "arima(1, 1, 1)"
+        }
+      }
+    }
+  ],
+  "validation_summary": {
+    "naive": {
+      "mae_mean": 615699.9895833336,
+      "rmse_mean": 794570.3880438219,
+      "mae_rank": 4.0,
+      "rmse_rank": 4.0,
+      "average_rank": 4.0,
+      "n_folds": 4
+    },
+    "seasonal_naive": {
+      "mae_mean": 538941.3745833335,
+      "rmse_mean": 552396.7019036133,
+      "mae_rank": 1.0,
+      "rmse_rank": 1.0,
+      "average_rank": 1.0,
+      "n_folds": 4
+    },
+    "linear_trend": {
+      "mae_mean": 546660.7236160618,
+      "rmse_mean": 612364.5607699256,
+      "mae_rank": 2.0,
+      "rmse_rank": 2.0,
+      "average_rank": 2.0,
+      "n_folds": 4
+    },
+    "arima": {
+      "mae_mean": 601649.3240812499,
+      "rmse_mean": 772608.6479398145,
+      "mae_rank": 3.0,
+      "rmse_rank": 3.0,
+      "average_rank": 3.0,
+      "n_folds": 4
+    }
+  },
+  "selected_model": "seasonal_naive",
+  "selected_forward_model": "seasonal_naive",
+  "selection_rule": "Lowest average of validation MAE rank and validation RMSE rank. Ties prefer the simpler model: naive, seasonal_naive, linear_trend, arima. The final test set is not an input to this rule.",
+  "test_metrics": {
+    "mae": 466676.805,
+    "rmse": 482385.7943268414,
+    "mape": 4.052386886618101,
+    "mape_excluded_zeros": 0,
+    "n_scored": 6,
+    "mape_note": "MAPE 只描述最终测试集，不参与模型选择。实际值为 0 的月份已排除。实际销售额较小时，MAPE 会被放大。",
+    "model": "seasonal_naive"
+  },
+  "test_detail": [
+    {
+      "month": "2024-07-01",
+      "actual": 10952191.25,
+      "seasonal_naive": 10466488.75
+    },
+    {
+      "month": "2024-08-01",
+      "actual": 11100961.03,
+      "seasonal_naive": 10382136.54
+    },
+    {
+      "month": "2024-09-01",
+      "actual": 11210325.02,
+      "seasonal_naive": 10805570.81
+    },
+    {
+      "month": "2024-10-01",
+      "actual": 11743071.82,
+      "seasonal_naive": 11277495.34
+    },
+    {
+      "month": "2024-11-01",
+      "actual": 12241786.46,
+      "seasonal_naive": 11881785.64
+    },
+    {
+      "month": "2024-12-01",
+      "actual": 12644455.99,
+      "seasonal_naive": 12279253.66
+    }
+  ],
+  "history": [
+    {
+      "month": "2021-01-01",
+      "sales_amount": 10610242.83
+    },
+    {
+      "month": "2021-02-01",
+      "sales_amount": 10617397.06
+    },
+    {
+      "month": "2021-03-01",
+      "sales_amount": 10439747.39
+    },
+    {
+      "month": "2021-04-01",
+      "sales_amount": 10122916.7
+    },
+    {
+      "month": "2021-05-01",
+      "sales_amount": 9648971.04
+    },
+    {
+      "month": "2021-06-01",
+      "sales_amount": 9392617.57
+    },
+    {
+      "month": "2021-07-01",
+      "sales_amount": 9318273.95
+    },
+    {
+      "month": "2021-08-01",
+      "sales_amount": 9516108.55
+    },
+    {
+      "month": "2021-09-01",
+      "sales_amount": 9771747.2
+    },
+    {
+      "month": "2021-10-01",
+      "sales_amount": 10258697.92
+    },
+    {
+      "month": "2021-11-01",
+      "sales_amount": 10626409.76
+    },
+    {
+      "month": "2021-12-01",
+      "sales_amount": 11135816.68
+    },
+    {
+      "month": "2022-01-01",
+      "sales_amount": 11194362.85
+    },
+    {
+      "month": "2022-02-01",
+      "sales_amount": 11157413.73
+    },
+    {
+      "month": "2022-03-01",
+      "sales_amount": 11033754.32
+    },
+    {
+      "month": "2022-04-01",
+      "sales_amount": 10629343.44
+    },
+    {
+      "month": "2022-05-01",
+      "sales_amount": 10228021.09
+    },
+    {
+      "month": "2022-06-01",
+      "sales_amount": 9890118.2
+    },
+    {
+      "month": "2022-07-01",
+      "sales_amount": 9948513.97
+    },
+    {
+      "month": "2022-08-01",
+      "sales_amount": 9859048.52
+    },
+    {
+      "month": "2022-09-01",
+      "sales_amount": 10429060.78
+    },
+    {
+      "month": "2022-10-01",
+      "sales_amount": 10775786.05
+    },
+    {
+      "month": "2022-11-01",
+      "sales_amount": 11316036.23
+    },
+    {
+      "month": "2022-12-01",
+      "sales_amount": 11455973.34
+    },
+    {
+      "month": "2023-01-01",
+      "sales_amount": 11657744.37
+    },
+    {
+      "month": "2023-02-01",
+      "sales_amount": 11766007.43
+    },
+    {
+      "month": "2023-03-01",
+      "sales_amount": 11630148.6
+    },
+    {
+      "month": "2023-04-01",
+      "sales_amount": 11173296.15
+    },
+    {
+      "month": "2023-05-01",
+      "sales_amount": 10785589.16
+    },
+    {
+      "month": "2023-06-01",
+      "sales_amount": 10484988.87
+    },
+    {
+      "month": "2023-07-01",
+      "sales_amount": 10466488.75
+    },
+    {
+      "month": "2023-08-01",
+      "sales_amount": 10382136.54
+    },
+    {
+      "month": "2023-09-01",
+      "sales_amount": 10805570.81
+    },
+    {
+      "month": "2023-10-01",
+      "sales_amount": 11277495.34
+    },
+    {
+      "month": "2023-11-01",
+      "sales_amount": 11881785.64
+    },
+    {
+      "month": "2023-12-01",
+      "sales_amount": 12279253.66
+    },
+    {
+      "month": "2024-01-01",
+      "sales_amount": 12352316.53
+    },
+    {
+      "month": "2024-02-01",
+      "sales_amount": 12287105.81
+    },
+    {
+      "month": "2024-03-01",
+      "sales_amount": 11898695.98
+    },
+    {
+      "month": "2024-04-01",
+      "sales_amount": 11702116.25
+    },
+    {
+      "month": "2024-05-01",
+      "sales_amount": 11327371.43
+    },
+    {
+      "month": "2024-06-01",
+      "sales_amount": 11034323.94
+    },
+    {
+      "month": "2024-07-01",
+      "sales_amount": 10952191.25
+    },
+    {
+      "month": "2024-08-01",
+      "sales_amount": 11100961.03
+    },
+    {
+      "month": "2024-09-01",
+      "sales_amount": 11210325.02
+    },
+    {
+      "month": "2024-10-01",
+      "sales_amount": 11743071.82
+    },
+    {
+      "month": "2024-11-01",
+      "sales_amount": 12241786.46
+    },
+    {
+      "month": "2024-12-01",
+      "sales_amount": 12644455.99
+    }
+  ],
+  "forward": [
+    {
+      "month": "2025-01-01",
+      "forecast": 12352316.53
+    },
+    {
+      "month": "2025-02-01",
+      "forecast": 12287105.81
+    },
+    {
+      "month": "2025-03-01",
+      "forecast": 11898695.98
+    },
+    {
+      "month": "2025-04-01",
+      "forecast": 11702116.25
+    },
+    {
+      "month": "2025-05-01",
+      "forecast": 11327371.43
+    },
+    {
+      "month": "2025-06-01",
+      "forecast": 11034323.94
+    }
+  ],
+  "warnings": [],
+  "intervals": null,
+  "disclaimer": "Metrics describe this series only. synthetic_demo series do not measure a real pharmaceutical market.",
+  "forecast_grain": "total",
+  "product": null,
+  "region": null,
+  "series_id": "total",
+  "series_label": "所选产品与地区的销售额合计",
+  "series_definition": "Total grain: monthly sum of sales_amount across the analytical panel after exclusions. Product, region, and product-region forecasts are separate series and are not fitted together.",
+  "data_type": [
+    "synthetic_demo"
+  ]
+}

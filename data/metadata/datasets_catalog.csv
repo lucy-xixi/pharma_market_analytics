@@ -1,7 +1,2 @@
 dataset_name,file_name,domain,data_type,data_source,frequency,grain,status,notes
-digital_industry_indicators,digital_industry_indicators.csv,digital_industry,synthetic,synthetic_demo,annual,year x industry x region,active,Portfolio synthetic panel for digital economy analytics
-technology_investment_trends,technology_investment_trends.csv,digital_industry,synthetic,synthetic_demo,annual,year,active,Supplementary thematic investment series (not joined in Phase 1 commodity flow)
-digital_employment_macro,digital_employment_macro.csv,digital_industry,synthetic,synthetic_demo,annual,year,active,Supplementary labour macro series (not joined in Phase 1 commodity flow)
-crude_oil_weekly_synthetic,crude_oil_weekly_synthetic.csv,commodity_crude,synthetic,synthetic_demo,weekly,date x commodity_id,active,SYNTHETIC crude price/inventory demo — NOT real public market data
-industry_panel_clean,industry_panel_clean.csv,digital_industry,processed,pipeline,annual,year x industry x region,active,Cleaned digital industry analytical store
-crude_oil_weekly_clean,crude_oil_weekly_clean.csv,commodity_crude,processed,pipeline,weekly,date x commodity_id,active,Cleaned synthetic crude panel with Phase-1 features
+pharma_sales_monthly_synthetic,pharma_sales_monthly_synthetic.csv,pharma_market,synthetic_demo,synthetic_demo,monthly,month x product x region,active,Synthetic monthly sales panel. Not a measurement of a real pharmaceutical market.
